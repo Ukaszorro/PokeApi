@@ -21,11 +21,21 @@ async function fetchData(url) {
 }
 
 async function searchPokemon(event) {
-  event.preventDefault();
+  // if (searchInput.value != "") {
+  //   console.log(searchInput.value);
+  //   const data = await fetchData(
+  //     `https://pokeapi.co/api/v2/pokemon/${searchInput.value}`
+  //   );
 
+  //   renderPokemonDetails(data);
+  // }
+  pokemonList.innerHTML = "";
   try {
-    const apiUrl = `https://pokeapi.co/api/v2/pokemon`;
+    const apiUrl = `https://pokeapi.co/api/v2/pokemon?limit=2000&offset=0`;
     const data = await fetchData(apiUrl);
+    // const data_filtered = data.results.filter((pokemon) =>
+    //   pokemon.name.includes(searchInput.value)
+    // );
     const pokemon_list = await Promise.all(
       data.results.map(async (pokemon) => {
         const pokemonDetails = await fetchData(pokemon.url);
@@ -37,14 +47,13 @@ async function searchPokemon(event) {
         };
       })
     );
-
     if (pokemon_list.length > 0) {
       renderPokemonList(pokemon_list);
     } else {
-      console.log(`No results found`);
+      renderPokemonListNotFound("not found");
     }
   } catch (error) {
-    console.error("Error:", error);
+    console.log(error);
   }
 }
 
@@ -58,6 +67,12 @@ function renderPokemonList(pokemonData) {
     <p>ID: ${pokemon.id}</p>`;
     pokemonList.appendChild(pokemonTile);
   }, "");
+}
+
+function renderPokemonListNotFound(message) {
+  pokemonMessage = document.createElement("p");
+  pokemonMessage.innerText = message;
+  pokemonList.appendChild(pokemonMessage);
 }
 
 async function pokemonDetails(event) {
@@ -103,6 +118,7 @@ function renderPokemonDetails(pokemonDetails) {
   pokemonMetrics.className = "metrics";
   pokemonMetrics.innerHTML = `<li>weight: ${pokemonDetails.weight}</li>
             <li>height: ${pokemonDetails.height}</li>`;
+
   pokemonDetailsBox.appendChild(pokemonTypes);
   pokemonDetailsBox.appendChild(pokemonStats);
   pokemonDetailsBox.appendChild(pokemonMetrics);
