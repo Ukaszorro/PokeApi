@@ -5,10 +5,26 @@ const pokemonDetailsBox = document.getElementById("pokemon-details");
 
 // Event Listeners
 
+let currentRequestId = 0;
+
 searchButton.addEventListener("click", searchPokemon);
+searchInput.addEventListener(
+  "input",
+  debounce((event) => {
+    const query = event.target.value;
+    searchPokemon(query);
+  }, 300)
+);
 
 // functions
 
+function debounce(func, delay) {
+  let timeout;
+  return (...args) => {
+    clearTimeout(timeout);
+    timeout = setTimeout(() => func(...args), delay);
+  };
+}
 async function fetchData(url) {
   const response = await fetch(url);
   if (!response.ok) {
@@ -20,7 +36,7 @@ async function fetchData(url) {
   return data;
 }
 
-async function searchPokemon(event) {
+async function searchPokemon(inputValue) {
   // if (searchInput.value != "") {
   //   console.log(searchInput.value);
   //   const data = await fetchData(
@@ -29,6 +45,7 @@ async function searchPokemon(event) {
 
   //   renderPokemonDetails(data);
   // }
+  const requestId = ++currentRequestId;
   pokemonList.innerHTML = "";
   try {
     const apiUrl = `https://pokeapi.co/api/v2/pokemon?limit=1000&offset=0`;
@@ -36,6 +53,7 @@ async function searchPokemon(event) {
     const data_filtered = data.results.filter((pokemon) =>
       pokemon.name.includes(searchInput.value)
     );
+
     data_filtered.map(async (pokemon) => {
       const pokemonDetails = await fetchData(pokemon.url);
 
@@ -44,6 +62,9 @@ async function searchPokemon(event) {
         id: pokemonDetails.id,
         sprite: pokemonDetails.sprites.front_default,
       };
+      if (requestId !== currentRequestId) {
+        return; // stop if there is a new request
+      }
       renderPokemonTile(pokemon_info);
     });
   } catch (error) {
@@ -51,17 +72,17 @@ async function searchPokemon(event) {
   }
 }
 
-function renderPokemonList(pokemonData) {
-  pokemonData.reduce((_, pokemon) => {
-    const pokemonTile = document.createElement("div");
-    pokemonTile.className = "pokemon-tile";
-    pokemonTile.addEventListener("click", pokemonDetails);
-    pokemonTile.innerHTML = `<img src="${pokemon.sprite}" alt="${pokemon.name}" />
-    <p><strong>${pokemon.name}</strong></p>
-    <p>ID: ${pokemon.id}</p>`;
-    pokemonList.appendChild(pokemonTile);
-  }, "");
-}
+// function renderPokemonList(pokemonData) {
+//   pokemonData.reduce((_, pokemon) => {
+//     const pokemonTile = document.createElement("div");
+//     pokemonTile.className = "pokemon-tile";
+//     pokemonTile.addEventListener("click", pokemonDetails);
+//     pokemonTile.innerHTML = `<img src="${pokemon.sprite}" alt="${pokemon.name}" />
+//     <p><strong>${pokemon.name}</strong></p>
+//     <p>ID: ${pokemon.id}</p>`;
+//     pokemonList.appendChild(pokemonTile);
+//   }, "");
+// }
 
 function renderPokemonTile(pokemon) {
   const pokemonTile = document.createElement("div");
