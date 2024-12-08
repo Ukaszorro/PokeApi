@@ -2,6 +2,7 @@ const searchButton = document.getElementById("search-button");
 const searchInput = document.getElementById("search-input");
 const pokemonList = document.getElementById("pokemon-list");
 const pokemonDetailsBox = document.getElementById("pokemon-details");
+const loadingContainer = document.getElementById("loading-container");
 
 // Event Listeners
 
@@ -36,6 +37,17 @@ async function fetchData(url) {
   return data;
 }
 
+function cleanPokemonList() {
+  const tiles = document.querySelectorAll(".pokemon-tile");
+  if (tiles.length > 0) {
+    Array.from(tiles).reduce(
+      (_, tile) => tile.removeEventListener("click", pokemonDetails),
+      ""
+    );
+  }
+  pokemonList.innerHTML = "";
+}
+
 async function searchPokemon(inputValue) {
   // if (searchInput.value != "") {
   //   console.log(searchInput.value);
@@ -46,8 +58,10 @@ async function searchPokemon(inputValue) {
   //   renderPokemonDetails(data);
   // }
   const requestId = ++currentRequestId;
-  pokemonList.innerHTML = "";
+
   try {
+    cleanPokemonList();
+    renderLoading();
     const apiUrl = `https://pokeapi.co/api/v2/pokemon?limit=1000&offset=0`;
     const data = await fetchData(apiUrl);
     const data_filtered = data.results.filter((pokemon) =>
@@ -67,6 +81,7 @@ async function searchPokemon(inputValue) {
       }
       renderPokemonTile(pokemon_info);
     });
+    loadingContainer.innerHTML = "";
   } catch (error) {
     console.log(error);
   }
@@ -98,6 +113,12 @@ function renderPokemonListNotFound(message) {
   pokemonMessage = document.createElement("p");
   pokemonMessage.innerText = message;
   pokemonList.appendChild(pokemonMessage);
+}
+
+function renderLoading() {
+  loadingContainer.innerHTML = `<div class="main-ball">
+          <div class="pokebutton"></div>
+        </div>Loading...`;
 }
 
 async function pokemonDetails(event) {
