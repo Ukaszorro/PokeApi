@@ -1,0 +1,193 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --size: 50px;
+}
+
+* {
+  margin: 0;
+  box-sizing: border-box;
+  padding: 0;
+  color: black;
+  font-size: 1.2rem;
+}
+
+body {
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background-image: linear-gradient(
+    90deg,
+    rgb(253, 211, 211),
+    rgb(253, 129, 129)
+  );
+}
+
+main {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+#title {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#logo {
+  height: 6vmin;
+  width: 6vmin;
+  border-radius: 50%;
+  border: 0.45vmin solid black;
+  background-image: radial-gradient(
+      white 20%,
+      white 20%,
+      black 20%,
+      black 30%,
+      transparent 30%,
+      transparent
+    ),
+    linear-gradient(red 46%, black 46%, black 54%, white 54%);
+  margin: 10px;
+}
+
+#search-bar {
+  display: flex;
+  align-items: center;
+}
+
+#pokemon-container {
+  width: 80%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  max-height: auto;
+  overflow: auto;
+}
+
+#pokemon-list > *,
+#pokemon-details {
+  background-color: white;
+  border-radius: 5px;
+  box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
+  margin: 0.5em;
+}
+#pokemon-list > *:hover,
+#pokemon-details:hover {
+  transform: scale(1.1);
+}
+
+#pokemon-list .pokemon-tile {
+  display: flex;
+  align-items: center;
+}
+
+.pokemon-tile {
+  justify-content: space-evenly;
+  padding: 10px;
+}
+
+#pokemon-list {
+  max-height: 100vh;
+  overflow: auto;
+}
+
+#pokemon-details {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  max-height: -moz-fit-content;
+  max-height: fit-content;
+}
+
+ul {
+  list-style-type: none;
+}
+ul li {
+  font-size: 0.8rem;
+}
+
+ul.stats {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  justify-items: center;
+  margin: 5px;
+  gap: 5px;
+}
+
+ul.types,
+ul.metrics {
+  display: flex;
+  gap: 5px;
+  margin: 5px;
+}
+
+#loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.main-ball {
+  background: #fff;
+  width: var(--size);
+  height: var(--size);
+  border: calc(var(--size) * 0.0625) solid black;
+  border-radius: 50%;
+  overflow: hidden;
+  position: relative;
+}
+
+.main-ball::before,
+.main-ball::after {
+  content: "";
+  position: absolute;
+}
+
+.main-ball::before {
+  background: red;
+  width: 100%;
+  height: 50%;
+}
+
+.main-ball::after {
+  top: calc(50% - var(--size) * 0.0375);
+  width: 100%;
+  height: calc(var(--size) * 0.0625);
+  background: #000;
+}
+
+.pokebutton {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: calc(var(--size) * 0.25);
+  height: calc(var(--size) * 0.25);
+  background: #7f8c8d;
+  z-index: 1;
+  border: calc(var(--size) * 0.05) solid #fff;
+  border-radius: 50%;
+  box-shadow: 0 0 0 calc(var(--size) * 0.05) #000;
+}
+
+.pokebutton.loading {
+  animation: buttonglow 1.5s infinite alternate;
+}
+
+@keyframes buttonglow {
+  0% {
+    background: #7f8c8d;
+  }
+  50% {
+    background: red;
+  }
+  100% {
+    background: #7f8c8d;
+  }
+}
