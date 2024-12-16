@@ -2,29 +2,70 @@
 import Link from "next/link";
 import Image from "next/image";
 import axios from "axios";
+import { useEffect, useState } from "react";
+import { AiOutlineHeart, AiFillHeart } from "react-icons/ai";
 
-export async function fetchData(url) {
-  const data = await axios.get(url).then((res) => res.data);
-  return data;
-}
-const preparePokemon = async (pokemon) => {
-  const pokemonDetails = await fetchData(pokemon.url);
-  return {
-    name: pokemonDetails.name,
-    id: pokemonDetails.id,
-    sprite: pokemonDetails.sprites.front_default,
+const PokemonTile = ({ pokemon }) => {
+  const [isFavorite, setIsFavorite] = useState(false);
+
+  const getFavoritesFromStorage = () => {
+    const savedFavorites = JSON.parse(
+      localStorage.getItem("favorites") || "[]"
+    );
+    return savedFavorites;
   };
-};
 
-const PokemonTile = async ({ pokemon }) => {
-  const pokemonInfo = await preparePokemon(pokemon);
+  useEffect(() => {
+    const favorites = JSON.parse(localStorage.getItem("favorites") || "[]");
+    const wasFavorite = favorites.some((fav) => fav.id == pokemon.id);
+    setIsFavorite(wasFavorite);
+  }, []);
+
+  const handleFavoriteToggle = (e) => {
+    e.stopPropagation();
+    e.preventDefault();
+    const favorites = getFavoritesFromStorage();
+
+    const updatedFavorites = isFavorite
+      ? favorites.filter((favPokemon) => favPokemon.id != pokemon.id)
+      : [...favorites, pokemon];
+
+    localStorage.setItem("favorites", JSON.stringify(updatedFavorites));
+    setIsFavorite(!isFavorite);
+    console.log(!isFavorite);
+  };
   return (
-    <Link href={`/pokemon/${pokemonInfo.id}`} className="pokemon-tile">
-      <img src={pokemonInfo.sprite} alt={pokemonInfo.name} />
-      <p>
-        <strong>{pokemonInfo.name}</strong>
-      </p>
-      <p>#{pokemonInfo.id}</p>
+    <Link href={`/pokemon/${pokemon.id}`} className="pokemon-tile">
+      <div className="pokemon-tile" style={{ position: "relative" }}>
+        <img src={pokemon.sprite} alt={pokemon.name} />
+        <p>
+          <strong>{pokemon.name}</strong>
+        </p>
+        <p>#{pokemon.id}</p>
+
+        <button
+          className="favorite-button"
+          style={{
+            position: "absolute",
+            top: "10px",
+            right: "10px",
+            background: "none",
+            border: "none",
+            cursor: "pointer",
+            fontSize: "1.5rem",
+            padding: "0",
+            width: "auto",
+            height: "auto",
+          }}
+          onClick={(e) => handleFavoriteToggle(e)}
+        >
+          {isFavorite ? (
+            <AiFillHeart style={{ fill: "red" }} />
+          ) : (
+            <AiOutlineHeart />
+          )}
+        </button>
+      </div>
     </Link>
   );
 };

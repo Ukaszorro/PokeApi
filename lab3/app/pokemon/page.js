@@ -1,42 +1,71 @@
+"use client";
+
 import PokemonList from "../components/PokemonList";
-import PokemonDetails from "../components/PokemonDetails";
-import axios from "axios";
-import { Suspense } from "react";
+import { useSearchParams } from "next/navigation";
+import { useEffect, useState } from "react";
 
-// export async function fetchData(
-//   url = "https://pokeapi.co/api/v2/pokemon?limit=1510&offset=0"
-// ) {
-//   const data = await axios.get(url).then((res) => res.data);
-//   return data;
-// }
-export default async function Homepage() {
-  let currentRequestId = 0;
-  let pokemonData = [];
-  let pokemonDetailsContainer = {};
+export default function PokemonPage() {
+  const [pokemonData, setPokemonData] = useState([]);
+  const [filteredData, setFilteredData] = useState([]);
+  const searchParams = useSearchParams();
+  const type = searchParams.get("type") || "";
+  const search = searchParams.get("search") || "";
+  const limit = searchParams.get("limit") || 20;
 
-  // const data = await fetchData().then((res) => res.results);
+  useEffect(() => {
+    async function fetchData(
+      url = "https://pokeapi.co/api/v2/pokemon?limit=10000&offset=0"
+    ) {
+      const data = await fetch(url).then((res) => res.json());
+      const cachedData = localStorage.getItem("pokemonData");
 
-  //   const searchFilter = (array) => {
-  //     return array.filter((el) => el.name.toLowerCase().includes(query));
-  //   };
-  // const prepareList = async (pokemonList) =>
-  //   await Promise.all(
-  //     pokemonList.map(async (pokemon) => {
-  //       const pokemonDetails = await fetchData(pokemon.url);
-  //       return {
-  //         name: pokemonDetails.name,
-  //         id: pokemonDetails.id,
-  //         sprite: pokemonDetails.sprites.front_default,
-  //       };
-  //     })
-  //   );
+      if (cachedData) {
+        setPokemonData(JSON.parse(cachedData));
+        console.log("skiiiibidi");
+        return;
+      }
+      const fetchDetails = async (pokemonList) =>
+        await Promise.all(
+          pokemonList.map(async (pokemon) => {
+            const detailsResponse = await fetch(pokemon.url).then((res) =>
+              res.json()
+            );
+            return {
+              name: detailsResponse.name || "unknown",
+              id: detailsResponse.id || 0,
+              sprite: detailsResponse.sprites.front_default,
+              types: detailsResponse.types.map((t) => t.type.name),
+            };
+          })
+        );
 
-  // pokemonData = await prepareList(data);
+      const preparedData = await fetchDetails(data.results);
+      console.log(preparedData);
+      setPokemonData(preparedData);
 
-  //pokemonData = searchFilter(data);
-  return (
-    <Suspense fallback={<p>Loading...</p>}>
-      <PokemonList pokemons={pokemonData} />
-    </Suspense>
-  );
+      localStorage.setItem("pokemonData", JSON.stringify(preparedData));
+    }
+
+    fetchData();
+  }, []);
+
+  useEffect(() => {
+    let filtered = [...pokemonData];
+
+    if (search)
+      filtered = filtered.filter((pokemon) =>
+        pokemon.name.toLowerCase().includes(search.toLowerCase())
+      );
+
+    if (type)
+      filtered = filtered.filter((pokemon) => pokemon.types.includes(type));
+
+    if (limit) {
+      filtered = filtered.slice(0, limit);
+    }
+
+    setFilteredData(filtered);
+  }, [searchParams, pokemonData]);
+
+  return <PokemonList pokemons={filteredData} />;
 }

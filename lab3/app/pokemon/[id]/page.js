@@ -14,5 +14,9 @@ export default async function PokemonPage({ params }) {
 
   const details = await fetchData(url);
 
-  return <PokemonDetails details={details} />;
+  return (
+    <div id="pokemon-details">
+      <PokemonDetails details={details} />
+    </div>
+  );
 }
